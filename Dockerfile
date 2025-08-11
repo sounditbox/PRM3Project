@@ -1,9 +1,15 @@
 FROM python:3.12-alpine
 
+RUN pip install poetry
+
+RUN poetry config virtualenvs.create false
+
 WORKDIR /code
 
-RUN pip install poetry
+COPY pyproject.toml poetry.lock ./
+
+RUN poetry install --no-interaction --no-root
 
 COPY . .
 
-RUN poetry install
+CMD ["poetry", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
