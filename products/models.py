@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
-
+from django.urls import reverse
 
 class JournalizedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,7 +48,7 @@ class Product(JournalizedModel):
         return self.name
 
     def get_absolute_url(self):
-        return f'/products/{self.slug}/'
+        return reverse('products:product-detail', kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:
