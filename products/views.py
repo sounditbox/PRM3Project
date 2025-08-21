@@ -1,8 +1,9 @@
 from django.db.models import Avg, Q
 from django.views.generic import ListView, DetailView, TemplateView
 
-from products.models import Product, Review, Category
 from config.settings import PRODUCTS_QUERY_MAP
+from products.models import Product, Review, Category
+
 
 class ProductDetailView(DetailView):
     slug_field = 'slug'
@@ -21,7 +22,7 @@ class ProductDetailView(DetailView):
 class ProductListView(ListView):
     context_object_name = 'products'
     template_name = 'products/product-list.html'
-    paginate_by = 2
+    paginate_by = 1
     allow_empty = True
 
     def get_queryset(self):
@@ -51,6 +52,13 @@ class ProductListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
+
+        context['sort_options'] = [
+            {'key': 'new', 'label': 'New'},
+            {'key': 'price_asc', 'label': 'Price ascending'},
+            {'key': 'price_desc', 'label': 'Price descending'},
+            {'key': 'rating', 'label': 'Rating'}
+        ]
         return context
 
 
