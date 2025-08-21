@@ -2,6 +2,6 @@
 .env
 .venv
 .env.local
-*/__pycache__/
+__pycache__
 db.sqlite3
 media/*

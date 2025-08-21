@@ -1,7 +1,6 @@
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 
-from products.models import Product, Review
+from products.models import Product, Review, Category
 
 
 class ProductDetailView(DetailView):
@@ -18,4 +17,16 @@ class ProductDetailView(DetailView):
         return context
 
 
+class ProductListView(ListView):
+    queryset = Product.objects.filter(is_active=True)
+    context_object_name = 'products'
+    template_name = 'products/product-list.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        return context
+
+
+class GuidesRecipesView(TemplateView):
+    template_name = 'guides-recipes.html'
