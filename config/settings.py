@@ -93,7 +93,7 @@ LOGIN_REDIRECT_URL = reverse_lazy('users:home')
 
 
 PRODUCTS_QUERY_MAP = {
-    'new': '-created',
+    'new': '-created_at',
     'rating': '-reviews__rating',
     'price_asc': 'price',
     'price_desc': '-price',

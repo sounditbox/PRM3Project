@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load my_filters %}
 
 {% block content %}
 <!-- Main Content -->
@@ -25,13 +26,16 @@
                 <div class="checkbox-group">
                     {% for category in categories %}
                     <label class="checkbox-container">{{ category.name }}
-                        <input type="checkbox" data-keyword="{{ category.name }}">
+                        <input type="checkbox" data-keyword="{{ category.slug }}">
                         <span class="checkmark"></span>
                     </label>
                     {% empty %}
                     <p>No categories found.</p>
                     {% endfor %}
                 </div>
+            </div>
+            <div class="sidebar__section">
+                <button class="button button--primary" id="filter-button">Filter</button>
             </div>
         </aside>
 
@@ -44,12 +48,11 @@
                     </button>
                 </div>
                 <div class="sort-options">
-                    <button class="sort-button active-sort">
-                        <span>New</span>
+                    {% for item in sort_options %}
+                    <button class="sort-button {% if loop.first %}active-sort{% endif %}" data-sort="{{ item.key }}">
+                        <span>{{ item.label }}</span>
                     </button>
-                    <button class="sort-button">Price ascending</button>
-                    <button class="sort-button">Price descending</button>
-                    <button class="sort-button">Rating</button>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -93,7 +96,7 @@
 
             <div class="pagination">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}"
+                <a href="?{% update_query_string request page_obj.previous_page_number %}"
                    class="pagination__link pagination__link--prev">
                     <i class="fa-solid fa-arrow-left"></i>
                     <span>Previous</span>
@@ -105,7 +108,7 @@
 
 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="pagination__link pagination__link--next">
+                <a href="?{% update_query_string request page_obj.next_page_number %}" class="pagination__link pagination__link--next">
                     <span>Next</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
