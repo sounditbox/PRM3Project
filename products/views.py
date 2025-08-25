@@ -1,5 +1,7 @@
+from django.db.models import Avg, Q
 from django.views.generic import ListView, DetailView, TemplateView
 
+from config.settings import PRODUCTS_QUERY_MAP
 from products.models import Product, Review, Category
 
 
@@ -18,13 +20,45 @@ class ProductDetailView(DetailView):
 
 
 class ProductListView(ListView):
-    queryset = Product.objects.filter(is_active=True)
     context_object_name = 'products'
     template_name = 'products/product-list.html'
+    paginate_by = 1
+    allow_empty = True
+
+    def get_queryset(self):
+        qs = Product.objects.filter(is_active=True) \
+            .select_related('category') \
+            .annotate(avg_rating=Avg('reviews__rating'))
+
+        # filter by category
+        categories = self.request.GET.get('categories', None)
+        if categories:
+            qs = qs.filter(category__slug__in=categories.split(','))
+
+        # search
+        to_search = self.request.GET.get('q', None)
+        if to_search:
+            qs = qs.filter(
+                Q(name__icontains=to_search) |
+                Q(description__icontains=to_search)
+            )
+
+        # sort
+        qs_key = self.request.GET.get('sort', 'new')
+        qs = qs.order_by(PRODUCTS_QUERY_MAP[qs_key])
+
+        return list(qs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
+
+        context['sort_options'] = [
+            {'key': 'new', 'label': 'New'},
+            {'key': 'price_asc', 'label': 'Price ascending'},
+            {'key': 'price_desc', 'label': 'Price descending'},
+            {'key': 'rating', 'label': 'Rating'}
+        ]
         return context
 
 

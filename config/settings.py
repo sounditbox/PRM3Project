@@ -90,3 +90,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = reverse_lazy('users:home')
+
+
+PRODUCTS_QUERY_MAP = {
+    'new': '-created_at',
+    'rating': '-reviews__rating',
+    'price_asc': 'price',
+    'price_desc': '-price',
+}
