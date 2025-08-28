@@ -10,7 +10,7 @@
   {% if cart|length == 0 %}
   <div class="cart-empty">
     <p>Your cart is empty.</p>
-    <a class="button button--primary" href="{% url 'products:product_list' %}">Go
+    <a class="button button--primary" href="{% url 'products:product-list' %}">Go
       shopping</a>
   </div>
   {% endif %}
@@ -32,7 +32,7 @@
 
         <div class="cart-item__info">
           <h3 class="cart-item__title">
-            <a href="{% url 'products:product_detail' product.slug %}">{{
+            <a href="{% url 'products:product-detail' product.slug %}">{{
               product.name }}</a>
           </h3>
 
@@ -95,7 +95,7 @@
 
         <div class="summary-actions">
           <a class="button button--primary button--block"
-             href="{% url 'orders:checkout' %}">Checkout</a>
+             href="#">Checkout</a>
           <form action="{% url 'orders:cart_clear' %}" method="post">
             {% csrf_token %}
             <button type="submit" class="button button--ghost button--block">

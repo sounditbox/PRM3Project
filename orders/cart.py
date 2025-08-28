@@ -17,7 +17,7 @@ class Cart:
         key = str(product_id)
         if key not in self.cart:
             product = Product.objects.get(id=product_id)
-            self.cart[key] = {"quantity": 0, "price": str(product.price)}
+            self.cart[key] = {"quantity": 1, "price": str(product.price)}
             self._session_modified()
 
     def change_quantity(self, product_id: int, to_add: int) -> None:
@@ -28,6 +28,7 @@ class Cart:
         self.set_quantity(product_id, old_q + int(to_add))
 
     def set_quantity(self, product_id: int, quantity: int) -> None:
+        print(self.cart)
         key = str(product_id)
         if key not in self.cart:
             self.add(product_id)
