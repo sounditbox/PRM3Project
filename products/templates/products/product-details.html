@@ -20,16 +20,27 @@
         <div class="product-description">
           <p>{{ product.description }}</p>
         </div>
+
         <div class="cart-controls">
-          <button class="button button--primary add-to-cart-button" id="add-to-cart-btn">
+          <form action="{% url 'orders:cart_add' product.id %}?next={{ request.path }}" method="post">
+            {% csrf_token %}
+            <button type="submit"
+                    class="button button--primary add-to-cart-button {% if product.id in cart %}is-hidden{% endif %}"
+                    id="add-to-cart-btn">
             <i class="fa-solid fa-cart-shopping"></i>
             <span>Add to Cart</span>
           </button>
-          <div class="quantity-counter is-hidden" id="quantity-counter">
-            <button class="quantity-btn" data-action="decrease" aria-label="Decrease quantity"><i class="fa-solid fa-minus"></i></button>
-            <span class="quantity-value">1 in cart</span>
-            <button class="quantity-btn" data-action="increase" aria-label="Increase quantity"><i class="fa-solid fa-plus"></i></button>
+            <div class="quantity-counter {% if product.id not in cart %}is-hidden{% endif %}"
+                 id="quantity-counter">
+              <button type="submit" class="quantity-btn" data-action="decrease"
+                      aria-label="Decrease quantity"><i
+                      class="fa-solid fa-minus"></i></button>
+              <span class="quantity-value">{{ form.quantity.value }} in cart</span>
+              <button type="submit" class="quantity-btn" data-action="increase"
+                      aria-label="Increase quantity"><i
+                      class="fa-solid fa-plus"></i></button>
           </div>
+          </form>
         </div>
       </div>
     </section>
