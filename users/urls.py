@@ -1,7 +1,7 @@
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, reverse_lazy
 
-from .views import UserCreateView, AccountView
+from .views import UserCreateView, AccountView, UserUpdateView
 
 app_name = 'users'
 
@@ -10,7 +10,9 @@ urlpatterns = [
                                      next_page=reverse_lazy('products:product-list'),
                                      ), name='login'),
     path('register/', UserCreateView.as_view(), name='register'),
+    path('logout/', LogoutView.as_view(
+        next_page=reverse_lazy('products:product-list')), name='logout'),
 
     path('account/', AccountView.as_view(), name='account'),
-
+    path('update/<int:pk>', UserUpdateView.as_view(), name='update')
 ]

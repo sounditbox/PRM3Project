@@ -56,3 +56,33 @@ class UserRegistrationForm(UserCreationForm):
         return cleaned_data
 
 
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email', 'username', 'first_name', 'last_name', 'phone', 'city', 'address')
+        widgets = {
+            'email': forms.EmailInput(
+                attrs={'placeholder': 'example@gmail.com', 'class': 'Input'}),
+            'username': forms.TextInput(
+                attrs={'placeholder': 'Your username', 'class': 'Input'}),
+            'first_name': forms.TextInput(
+                attrs={'placeholder': 'John', 'class': 'Input'}),
+            'last_name': forms.TextInput(
+                attrs={'placeholder': 'Doe', 'class': 'Input'}),
+            'phone': forms.TextInput(
+                attrs={'placeholder': '+(995)595507248', 'class': 'Input'}),
+            'city': forms.TextInput(
+                attrs={'placeholder': 'Tbilisi', 'class': 'Input'}),
+            'address': forms.Textarea(
+                attrs={'placeholder': 'Rustaveli ave, 123', 'class': 'Textarea', 'rows': 3}),
+
+        }
+        labels = {
+            'email': 'Email',
+            'username': 'Username',
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'phone': 'Phone',
+            'address': 'Address',
+            'city': 'City',
+        }
