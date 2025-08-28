@@ -1,68 +1,84 @@
+from __future__ import annotations
+from typing import Dict, Iterator, Any
 from products.models import Product
 
 
 class Cart:
-    SESSION_KEY = 'cart'
-    cart: dict[int, dict[str, int | float]]
-
-    # { product_id: {'quantity': 1, 'price': 10.00} }
+    SESSION_KEY = "cart"
 
     def __init__(self, request):
         self.session = request.session
-        self.cart = self.session.get(self.SESSION_KEY, {})
-        print(self.cart)
-        self.__session_modified()
+        self.cart: Dict[str, Dict[str, Any]] = self.session.get(self.SESSION_KEY, {})
+        # normalize keys to str
+        if any(isinstance(k, int) for k in self.cart.keys()):
+            self.cart = {str(k): v for k, v in self.cart.items()}
+        self._session_modified()
 
-    def add(self, product_id: int):
-        product = Product.objects.get(id=product_id)
-        if product_id not in self.cart:
-            self.cart[product_id] = {'quantity': 0, 'price': str(product.price)}
-        self.change_quantity(product_id, 1)
+    def add(self, product_id: int) -> None:
+        key = str(product_id)
+        if key not in self.cart:
+            product = Product.objects.get(id=product_id)
+            self.cart[key] = {"quantity": 0, "price": str(product.price)}
+            self._session_modified()
 
-    def subtract(self, product_id: int):
-        self.change_quantity(product_id, -1)
+    def change_quantity(self, product_id: int, to_add: int) -> None:
+        key = str(product_id)
+        if key not in self.cart:
+            self.add(product_id)
+        old_q = int(self.cart[key]["quantity"])
+        self.set_quantity(product_id, old_q + int(to_add))
 
-    def remove(self, product_id: int):
-        self.set_quantity(product_id, 0)
-
-    def change_quantity(self, product_id: int, to_add: int):
-        if product_id not in self.cart:
-            self.set_quantity(product_id, to_add)
-        old_quantity = self.cart[product_id]['quantity']
-        self.set_quantity(product_id, old_quantity + to_add)
-
-    def set_quantity(self, product_id: int, quantity: int):
-        if product_id not in self.cart:
+    def set_quantity(self, product_id: int, quantity: int) -> None:
+        key = str(product_id)
+        if key not in self.cart:
             self.add(product_id)
         if quantity <= 0:
-            del self.cart[product_id]
-        self.cart[product_id]['quantity'] = quantity
-        self.__session_modified()
+            if key in self.cart:
+                del self.cart[key]
+        else:
+            self.cart[key]["quantity"] = int(quantity)
+        self._session_modified()
 
-    def clear(self):
-        self.session.pop(self.SESSION_KEY)
-        self.__session_modified()
+    def remove(self, product_id: int) -> None:
+        key = str(product_id)
+        if key in self.cart:
+            del self.cart[key]
+            self._session_modified()
 
-    def __iter__(self):
-        for product_id, product_data in self.cart.items():
-            product = Product.objects.get(id=product_id)
+    def clear(self) -> None:
+        self.cart = {}
+        self._session_modified()
+
+    def get_quantity(self, product_id: int) -> int:
+        key = str(product_id)
+        data = self.cart.get(key)
+        return int(data.get("quantity", 0)) if data else 0
+
+    # python protocol
+    def __contains__(self, product_id: int) -> bool:
+        return str(product_id) in self.cart
+
+    def __len__(self) -> int:
+        return sum(int(item["quantity"]) for item in self.cart.values())
+
+    def __iter__(self) -> Iterator[dict]:
+        product_ids = [int(pid) for pid in self.cart.keys()]
+        products = {p.id: p for p in Product.objects.filter(id__in=product_ids)}
+        for pid_str, data in self.cart.items():
+            pid = int(pid_str)
+            product = products.get(pid)
+            if not product:
+                continue
             yield {
-                product_id: {
-                    'product': product,
-                    'data': product_data,
-                    'total_price': product_data['quantity'] * product_data[
-                        'price']
-                }}
+                "product": product,
+                "data": data,
+                "total_price": float(data["quantity"]) * float(data["price"]),
+            }
 
-    def __len__(self):
-        return sum(item['quantity'] for item in self.cart.values())
+    def get_total_price(self) -> float:
+        return sum(float(item["quantity"]) * float(item["price"]) for item in self.cart.values())
 
-    def get_total_price(self):
-        return sum(
-            item['quantity'] * float(item['price']) for item in self.cart.values()
-        )
-
-    def __session_modified(self):
+    # internal
+    def _session_modified(self) -> None:
         self.session[self.SESSION_KEY] = self.cart
         self.session.modified = True
-        print(self.session[self.SESSION_KEY])

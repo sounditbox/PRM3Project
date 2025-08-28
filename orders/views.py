@@ -1,24 +1,29 @@
-from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import TemplateView
 
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
 from orders.cart import Cart
-# from orders.forms import CartAddItemForm
-from products.models import Product
 
 
 class CartDetail(TemplateView):
     template_name = 'orders/cart_detail.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
 
 def cart_order_add(request, product_id: int):
     cart = Cart(request)
-    #form = CartAddItemForm(request.POST or None)
 
-    quantity = int(request.POST['quantity'])
-    cart.change_quantity(product_id, quantity)
+    action = request.POST.get('action')
+    qty = request.POST.get('quantity')
+
+    try:
+        if action in {'increase', 'decrease'}:
+            delta = 1 if action == 'increase' else -1
+            cart.change_quantity(product_id, delta)
+        elif qty is not None:
+            cart.change_quantity(product_id, int(qty))
+        else:
+            cart.change_quantity(product_id, 1)
+    except (TypeError, ValueError):
+        pass
+
     next_url = request.GET.get('next')
     return redirect(next_url or 'orders:cart_detail')
