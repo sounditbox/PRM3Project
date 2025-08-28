@@ -16,7 +16,11 @@
       </div>
 
       <form class="auth-form" id="login-form" method="post">
-            {% for field in form %}
+          {% csrf_token %}
+          {% if form.errors %}
+          {{ form.errors }}
+          {% endif %}
+          {% for field in form %}
                 <div class="InputField">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
