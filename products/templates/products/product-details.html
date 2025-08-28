@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load my_filters %}
+{% load cart_tags %}
+
 <!-- Main Content -->
 <main class="page-product">
   <div class="container">
@@ -21,15 +23,33 @@
           <p>{{ product.description }}</p>
         </div>
         <div class="cart-controls">
-          <button class="button button--primary add-to-cart-button" id="add-to-cart-btn">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Add to Cart</span>
-          </button>
-          <div class="quantity-counter is-hidden" id="quantity-counter">
-            <button class="quantity-btn" data-action="decrease" aria-label="Decrease quantity"><i class="fa-solid fa-minus"></i></button>
-            <span class="quantity-value">1 in cart</span>
-            <button class="quantity-btn" data-action="increase" aria-label="Increase quantity"><i class="fa-solid fa-plus"></i></button>
-          </div>
+          <form action="{% url 'orders:cart_add' product.id %}?next={{ request.path }}"
+                method="post">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1">
+
+            <button type="submit"
+                    class="button button--primary add-to-cart-button {% if cart|in_cart:product %}is-hidden{% endif %}"
+                    id="add-to-cart-btn">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span>Add to Cart</span>
+            </button>
+
+            <div class="quantity-counter {% if not cart|in_cart:product %}is-hidden{% endif %}"
+
+                 id="quantity-counter">
+              <button type="submit" class="quantity-btn" name="action"
+                      value="decrease" aria-label="Decrease quantity">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              {% cart_quantity cart product as qty %}
+              <span class="quantity-value">{{ qty }} in cart</span>
+              <button type="submit" class="quantity-btn" name="action"
+                      value="increase" aria-label="Increase quantity">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

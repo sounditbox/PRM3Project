@@ -2,6 +2,7 @@ from django.db.models import Avg, Q
 from django.views.generic import ListView, DetailView, TemplateView
 
 from config.settings import PRODUCTS_QUERY_MAP
+# from orders.forms import CartAddItemForm
 from products.models import Product, Review, Category
 
 
@@ -16,6 +17,7 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['reviews'] = Review.objects.filter(product=self.object)
+        # context['cart_form'] = CartAddItemForm()
         return context
 
 

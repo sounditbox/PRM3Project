@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+{% load cart_tags %}
+
+{% block content %}
+<div class="cart-page container">
+
+  <h1 class="cart-title">Your Cart</h1>
+
+  {% if cart|length == 0 %}
+  <div class="cart-empty">
+    <p>Your cart is empty.</p>
+    <a class="button button--primary" href="{% url 'products:product-list' %}">Go
+      shopping</a>
+  </div>
+  {% endif %}
+
+  <div class="cart-layout">
+    <div class="cart-items">
+
+      {% for item in cart %}
+      {% with product=item.product data=item.data total=item.total_price %}
+      <article class="cart-item">
+        <a class="cart-item__image"
+           href="{% url 'products:product-detail' product.slug %}">
+          {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <img src="{% static 'img/placeholder.png' %}" alt="">
+          {% endif %}
+        </a>
+
+        <div class="cart-item__info">
+          <h3 class="cart-item__title">
+            <a href="{% url 'products:product-detail' product.slug %}">{{
+              product.name }}</a>
+          </h3>
+
+          <div class="cart-item__meta">
+            <span class="cart-item__price">{{ product.price }} ₸</span>
+            </div>
+
+          <div class="cart-item__controls">
+            <form action="{% url 'orders:cart_add' product.id %}?next={{ request.path }}"
+                  method="post" class="qty-form">
+              {% csrf_token %}
+              <button type="submit" class="quantity-btn" name="action"
+                      value="decrease" aria-label="Decrease">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+
+              <span class="quantity-value">
+                  {{ data.quantity }}
+                </span>
+
+              <button type="submit" class="quantity-btn" name="action"
+                      value="increase" aria-label="Increase">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </form>
+
+            <form action="{% url 'orders:cart_remove' product.id %}?next={{ request.path }}"
+                  method="post" class="remove-form">
+              {% csrf_token %}
+              <button type="submit" class="button button--link danger">
+                Remove
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="cart-item__total">
+          <span class="line-total">{{ total }} ₸</span>
+          </div>
+      </article>
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+    <aside class="cart-summary">
+      <div class="summary-card">
+        <div class="summary-row">
+          <span>Items</span>
+          <span>{{ cart|length }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>{{ cart.get_total_price }} ₸</span>
+        </div>
+        <hr>
+        <div class="summary-total">
+          <span>Total</span>
+          <span>{{ cart.get_total_price }} ₸</span>
+        </div>
+
+        <div class="summary-actions">
+          <a class="button button--primary button--block"
+             href="#">Checkout</a>
+          <form action="{% url 'orders:cart_clear' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button button--ghost button--block">
+              Clear cart
+            </button>
+          </form>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

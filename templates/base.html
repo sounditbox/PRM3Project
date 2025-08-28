@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load cart_tags %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -42,8 +42,11 @@
             <a href="{% url 'users:account' %}" class="user-icon" aria-label="My Account">
                 <img src="{% static 'img/icons/User_alt.svg' %}" alt="User Account">
             </a>
-            <a href="cart.html" class="cart-icon" aria-label="Shopping Cart">
+            <a href="{% url 'orders:cart_detail' %}" class="cart-icon" aria-label="Shopping Cart">
                 <img src="{% static 'img/icons/Shopping_bag.svg' %}" alt="Shopping Cart">
+                {% if cart|length > 0 %}
+                <span class="cart-icon__count">{{ cart|length }}</span>
+                {% endif %}
             </a>
         </div>
         {% else %}
