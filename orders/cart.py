@@ -9,7 +9,6 @@ class Cart:
     def __init__(self, request):
         self.session = request.session
         self.cart: Dict[str, Dict[str, Any]] = self.session.get(self.SESSION_KEY, {})
-        # normalize keys to str
         if any(isinstance(k, int) for k in self.cart.keys()):
             self.cart = {str(k): v for k, v in self.cart.items()}
         self._session_modified()
@@ -54,7 +53,6 @@ class Cart:
         data = self.cart.get(key)
         return int(data.get("quantity", 0)) if data else 0
 
-    # python protocol
     def __contains__(self, product_id: int) -> bool:
         return str(product_id) in self.cart
 
